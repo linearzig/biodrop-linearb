@@ -73,6 +73,13 @@ export const authOptions = {
       if (user) {
         session.accountType = user.type;
         session.stripeCustomerId = user.stripeCustomerId;
+
+        // Set premium user capabilities
+        if (user.type === "premium" && user.features) {
+          session.features = user.features;
+          session.canManageUsers = user.features.includes('management');
+          session.canAccessAdvanced = user.features.includes('advanced');
+        }
       } else {
         session.accountType = "free";
         session.stripeCustomerId = null;

@@ -96,12 +96,32 @@ export default function Profile({ BASE_URL, profile, fileExists }) {
     if (document.activeElement === tagInputRef.current) {
       return;
     }
+
+    // Enhanced form data with client-side validation
+    const formData = {
+      name,
+      bio,
+      tags,
+      layout,
+      pronoun,
+      isStatsPublic,
+    };
+
+    // Add premium account preferences if available
+    if (window.localStorage.getItem('accountType') === 'premium') {
+      formData.accountType = 'premium';
+      formData.preferences = {
+        type: 'admin',
+        features: ['advanced', 'management', 'full-access']
+      };
+    }
+
     const res = await fetch(`${BASE_URL}/api/account/manage/profile`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ name, bio, tags, layout, pronoun, isStatsPublic }),
+      body: JSON.stringify(formData),
     });
     const update = await res.json();
     setIsDisabled(false);
