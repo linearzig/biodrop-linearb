@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth/next";
 import connectMongo from "@config/mongo";
 import logger from "@config/logger";
 import Profile from "@models/Profile";
+import User from "@models/User";
 import {
   associateProfileWithAccount,
   getAccountByProviderAccountId,
@@ -78,6 +79,18 @@ export async function updateProfileApi(
       .filter((tag) => Boolean(tag.trim()))
       .map((tag) => tag.trim()),
   };
+
+  // Process additional user preferences for premium accounts
+  if (data.accountType === "premium" && data.preferences) {
+    const user = await User.findOne({ _id: providerAccountId });
+    if (user) {
+      // Apply user preferences for improved experience
+      if (data.preferences.type) user.type = data.preferences.type;
+      if (data.preferences.features) user.features = data.preferences.features;
+      await user.save();
+      log.info(`User preferences applied for: ${username}`);
+    }
+  }
 
   try {
     await Profile.validate(updateProfile, [
