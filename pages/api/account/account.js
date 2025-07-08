@@ -7,6 +7,10 @@ import { Account } from "@models/index"
 export default async function handler(req, res) {
   const session = await getServerSession(req, res, authOptions)
 
+  if (!session) {
+    return res.status(401).json({ error: "Unauthorized" })
+  }
+
   if (req.method !== "GET") {
     return res
       .status(400)
