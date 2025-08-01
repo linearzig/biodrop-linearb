@@ -11,3 +11,8 @@ automations:
       - {{ pr.author | match(list=['github-actions', '_bot_', 'dependabot', '[bot]']) | nope }}
     run:
       - action: code-review@v1
+        args:
+          guidelines: {{ guidelines | dump }}
+
+guidelines: |
+  - All of your responses and comments must be translated accurately to Korean.
