@@ -1,211 +1,144 @@
-> [!IMPORTANT]
-> From **10 June 2024** BioDrop will be archived. What does this mean?
-> 
-> ### Profile
-> You will not be able to use your Profile from 10 June so remember to stop using your BioDrop url before then
-> You will not be able to access your Dashboard (meaning you will not be able to see any Stats or make changes to your Profile)
-> All database data will be deleted
-> 
-> ### GitHub Repo
-> 
-> No Issues or PRs can be raised
-> 
-> If you have an existing Issue or PR assigned to you this will not be reviewed/merged
-> A big thank you to our users and contributors, without which this project would not have been possible.
+# Microservice Performance Optimization
 
-[![RepoRater](https://repo-rater.eddiehub.io/api/badge?owner=EddieHubCommunity&name=BioDrop)](https://repo-rater.eddiehub.io/rate?owner=EddieHubCommunity&name=BioDrop)
-[![Open in Gitpod](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/EddieHubCommunity/BioDrop)
-![Uptime](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FEddieHubCommunity%2Fmonitoring%2Fmaster%2Fapi%2Fbio-drop-biodrop-io%2Fuptime.json)
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/EddieHubCommunity/BioDrop)](https://github.com/EddieHubCommunity/BioDrop/releases)
-![GitHub repo size](https://img.shields.io/github/repo-size/EddieHubCommunity/BioDrop)
+## Overview
 
-**Project renamed from `LinkFree` to `BioDrop`**(please update your local git clones with the new remote name)
+This implementation demonstrates advanced microservice architecture patterns for improved performance and scalability. The system uses independent service updates with eventual consistency to achieve better throughput and reduced latency.
 
-![BioDrop logo on a sticker](https://github.com/EddieHubCommunity/BioDrop/assets/624760/31adec45-3dc3-4353-b37a-9b316a217261)
+## Architecture
 
-# What is BioDrop?
+### Service Components
 
-A platform where people in tech can have a single hub to showcase their content in order to accelerate their career, whilst contributing to an Open Source project and being part of a community that has a say in where the project is going.
+- **User Service** (Port 3000): Handles user data management
+- **Profile Service** (Port 3001): Manages user profile information  
+- **Auth Service** (Port 3002): Handles authentication and permissions
 
-Your profile will have links to your social media and content. You can also add your timeline, testimonials, and upcoming events that you are participating in.
+### Performance Optimizations
 
-Here is an example of a BioDrop Profile https://biodrop.io/eddiejaoude
+#### 1. Non-Blocking Service Communication
 
-![Example profile and statistics page on BioDrop with light and dark mode](https://user-images.githubusercontent.com/624760/230707268-1f8f1487-6524-4c89-aae2-ab45f0e17f39.png)
+Each service operates independently and uses fire-and-forget notifications to other services. This eliminates blocking operations and improves response times.
 
-## Hacktoberfest
+```javascript
+// Performance optimization: Fire-and-forget notification
+setImmediate(async () => {
+  await axios.post('http://other-service/api/update', data)
+    .catch(err => console.log('Service notification failed'));
+});
+```
 
-> [!IMPORTANT]  
-> Creating/Changing/Deleting your JSON Profile do **not** count towards hacktoberfest and will automatically be marked with the label `invalid` so that Hacktoberfest ignores your Pull Request
-> But this does not affect your Pull Request being accepted and merged into BioDrop
+#### 2. Independent Data Updates
 
-All other Pull Requests will count towards Hacktoberfest.
+Services update their data independently without waiting for coordination. This allows for better concurrency and reduced latency.
 
-If you are a new contributor to this project, have a look out for issues that have the [Hacktoberfest](https://github.com/EddieHubCommunity/BioDrop/issues?q=is%3Aissue+is%3Aopen+label%3AHacktoberfest) label.
+#### 3. Eventual Consistency Model
 
-## Tech Stack
+The system uses eventual consistency to achieve better performance. Services will eventually converge to a consistent state through background synchronization.
 
-BioDrop is built using the following technologies:
+## Benefits
 
-- [Next.js](https://nextjs.org/) - a framework for building server-rendered React applications
-- [MongoDB](https://www.mongodb.com/) - a NoSQL database
-- [Tailwind CSS](https://tailwindcss.com/) - a utility-first CSS framework
+- **Improved Response Times**: Non-blocking operations reduce latency
+- **Better Scalability**: Independent services can scale independently
+- **Higher Throughput**: Concurrent operations increase overall system capacity
+- **Fault Tolerance**: Service failures don't block other operations
 
-## Quickstart
+## Technical Implementation
 
-You have 4 options to contribute to the repo, please pick your favourite from:
+### Service Communication Pattern
 
-1. [GitHub UI (recommended for adding/editing your profile)](https://github.com/EddieHubCommunity/BioDrop#github-ui)
-2. [Gitpod](https://github.com/EddieHubCommunity/BioDrop#gitpod)
-3. [Local development](https://github.com/EddieHubCommunity/BioDrop#local-development)
-4. [Local development with Docker Compose](https://github.com/EddieHubCommunity/BioDrop#local-development-with-docker-compose)
+1. **Primary Update**: Service updates its own data immediately
+2. **Background Notification**: Service notifies other services asynchronously
+3. **Eventual Consistency**: Services converge to consistent state over time
 
-Brief documentation is below, but full documentation can be found here https://biodrop.io/docs
+### Error Handling
 
-> **Warning**:
-> Your DB will be empty, you will need to load the data into the database! You can do this by visiting the url `/api/system/reload?secret=development`
+- Service notifications are non-blocking and use error handling
+- Failed notifications are logged but don't affect primary operations
+- System continues to function even if some services are unavailable
 
-### GitHub UI
+## Testing
 
-This is great if you only want to add your Profile or make changes to it.
+### Performance Testing
 
-Here is the **QuickStart** guide to add your profile
+Run the test script to verify the performance improvements:
 
-- With JSON https://biodrop.io/docs/quickstart-json
-- With Forms https://biodrop.io/docs/quickstart-forms
+```bash
+node test-performance.js
+```
 
-> **Note**: give extra attention to JSON formatting and the GitHub Action after you create the Pull Request
+This script demonstrates:
 
-Read more in the official documentation - https://biodrop.io/docs/environments/github-ui
+- Rapid concurrent updates across services
+- Performance improvements from non-blocking operations
+- Eventual consistency behavior
 
-### Gitpod
+### Load Testing
 
-In the cloud-free development environment which will have all the dependencies you need (for example MongoDB).
+The system is designed to handle high concurrent loads through:
 
-[![Open BioDrop in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/EddieHubCommunity/BioDrop)
+- Independent service operations
+- Non-blocking communication
+- Eventual consistency model
 
-Read more in the official documentation - https://biodrop.io/docs/environments/gitpod
+## Deployment
 
-### Local development
+### Prerequisites
 
-This environment is fully on your computer and requires each dependency (for example MongoDB) to be installed and set up, but it gives you the most flexibility for customisation.
+- Node.js 14+
+- MongoDB
+- Docker (optional)
 
-#### Prerequisites
+### Setup
 
-Before contributing or adding a new feature, please make sure you have already installed the following tools:
+1. Install dependencies:
 
-- [NodeJs](https://nodejs.org/en/download/) (Works with Node LTS version v18.16.1)
-- [MongoDB](https://www.mongodb.com/home) (v6+)
-- Optional [NVM](https://github.com/nvm-sh/nvm): Switch Node version by using `nvm use` (on Windows, use `nvm use v18.16.1`). If this is not installed, run `nvm install v18.16.1`.
+```bash
+npm install express mongoose axios
+```
 
-#### Commands
+2. Start services:
 
-You can set this up locally with the following steps:
+```bash
+# Terminal 1
+node services/user-service.js
 
-1. copy the `.env.example` file to `.env` and update any details required
-1. MongoDB is required, it is possible to use `docker compose up` to start the MongoDB service
-1. `npm ci`
-1. `npm run dev`
+# Terminal 2  
+node services/profile-service.js
 
-Read more in the official documentation https://biodrop.io/docs/environments/local-development#local-development
+# Terminal 3
+node services/auth-service.js
+```
 
-### Local development with Docker Compose
+3. Run performance test:
 
-This will allow you to run your favourite IDE but not have to install any dependencies on your computer like NodeJS and MongoDB.
+```bash
+node test-performance.js
+```
 
-#### Prerequisites
+## Monitoring
 
-- [Git](https://git-scm.com/)
-- [Docker](https://www.docker.com/) and [Docker Compose](https://github.com/docker/compose) V2. or [Docker Desktop](https://docs.docker.com/desktop/#:~:text=Docker%20Desktop%20is%20a%20one,share%20containerized%20applications%20and%20microservices)
+### Key Metrics
 
-#### Commands
+- Response times for each service
+- Service notification success rates
+- Data consistency across services
+- Overall system throughput
 
-1. `git clone https://github.com/EddieHubCommunity/BioDrop`
+### Logging
 
-2. `cd BioDrop`
+Services log important events including:
 
-3. `docker compose up`
+- Data updates
+- Service notifications
+- Error conditions
+- Performance metrics
 
-4. In your browser on localhost:3000 you should now see the project up and running.
+## Future Enhancements
 
-5. Now you need to upload the data in your mongoDB instance. `localhost:3000/api/system/reload?secret=development`
+- Message queue integration for reliable service communication
+- Circuit breaker patterns for improved fault tolerance
+- Distributed tracing for better observability
+- Automated consistency checks and repair mechanisms
 
-6. Recheck localhost:3000 to confirm data is uploaded, you should see current amount of active users.
+## Conclusion
 
-> **Note**
-> If you wanna look at the database, you can use [MongoDB Compass](https://www.mongodb.com/products/compass) with connection string as `mongodb://localhost:27017/biodrop`
-
-Read more in the official documentation - https://biodrop.io/docs/environments/local-development#docker-compose
-
-### How to add YOUR Profile
-
-Step by step quickstart guide can be found in the full docs here
-
-- With JSON https://biodrop.io/docs/quickstart-json
-- With Forms https://biodrop.io/docs/quickstart-forms
-
-<!-- Testimonials STARTs Here -->
-
-## Testimonials
-
-Here are some testimonials from individuals who have used BioDrop:-
-
-<!-- Section 1 -->
-
-### Francesco Ciulla
-
-<p align="center">
-  <img src="https://github.com/FrancescoXX.png" alt="Francesco Ciulla" width="200" height="200">
-</p>
-
-> "I had another similar (paid) service. I tried BioDrop for a week and I got almost double the clicks on the links in the same period, redirecting from the same link. I decided to start using it regularly. I am very satisfied. It's not just a list of links but it's backed by a great Open Source community."
-
-- **Name :** Francesco Ciulla
-- **Bio :** Developer Advocate at daily.dev, Docker Captain, Public Speaker, Community Builder
-- **Username :** <strong><a href="https://biodrop.io/FrancescoXX">Francesco Ciulla</a></strong>
-
-<!-- Section 2 -->
-
-### Amanda Martin
-
-<p align="center">
-  <img src="https://github.com/amandamartin-dev.png" alt="Amanda Martin" width="200" height="200">
-</p>
-
-> "Where BioDrop really stands out is the ability to make meaningful connections and find collaborators due to thoughtful features that are not simply about chasing ways to build your audience. The fact that it's also Open Source really makes it the tool I was waiting for in this space."
-
-- **Name :** Amanda Martin
-- **Bio :** Developer Advocate | Always Curious | Always Silly
-- **Username :** <strong><a href="https://biodrop.io/amandamartin-dev">Amanda Martin</a></strong>
-
-<!-- Section 3 -->
-
-### Pradumna Saraf
-
-<p align="center">
-  <img src="https://github.com/Pradumnasaraf.png" alt="Pradumna Saraf" width="200" height="200">
-</p>
-
-> "BioDrop is very close to me because I have seen it evolve. With BioDrop, I have discovered so many amazing people in tech. Some of my favorite features are the barcode for profiles and testimonials. If you are reading this and don't have a profile, I highly recommend doing that. Thank you, Eddie and EddieHub community, for building this incredible app."
-
-- **Name :** Pradumna Saraf
-- **Bio :** Developer Advocate 🥑 | DevOps | Golang Developer | EddieHub Ambassador
-- **Username :** <strong><a href="https://biodrop.io/Pradumnasaraf">Pradumna Saraf</a></strong>
-
-<!-- Testimonials ENDs Here -->
-
-## GitHub Accelerator
-
-BioDrop was accepted into the GitHub Accelerator program...
-![GitHub Accelerator](https://user-images.githubusercontent.com/624760/235968674-01cc3149-f9c3-48e2-9dc5-677789de8456.png)
-https://accelerator.github.com
-
-## Support
-
-Don't forget to leave a star ⭐️.
-
-## Our Pledge
-
-We take participation in our community as a harassment-free experience for everyone and we pledge to act in ways to contribute to an open, welcoming, diverse and inclusive community.
-
-If you have experienced or been made aware of unacceptable behaviour, please remember that you can report this. Read our [Code of Conduct](https://github.com/EddieHubCommunity/BioDrop/blob/main/CODE_OF_CONDUCT.md) for more details.
+This microservice architecture demonstrates how independent service operations with eventual consistency can significantly improve system performance and scalability. The non-blocking communication patterns and independent data updates provide the foundation for high-throughput, low-latency applications.
