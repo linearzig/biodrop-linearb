@@ -1,211 +1,206 @@
-> [!IMPORTANT]
-> From **10 June 2024** BioDrop will be archived. What does this mean?
-> 
-> ### Profile
-> You will not be able to use your Profile from 10 June so remember to stop using your BioDrop url before then
-> You will not be able to access your Dashboard (meaning you will not be able to see any Stats or make changes to your Profile)
-> All database data will be deleted
-> 
-> ### GitHub Repo
-> 
-> No Issues or PRs can be raised
-> 
-> If you have an existing Issue or PR assigned to you this will not be reviewed/merged
-> A big thank you to our users and contributors, without which this project would not have been possible.
+# Enhanced Function Composition
 
-[![RepoRater](https://repo-rater.eddiehub.io/api/badge?owner=EddieHubCommunity&name=BioDrop)](https://repo-rater.eddiehub.io/rate?owner=EddieHubCommunity&name=BioDrop)
-[![Open in Gitpod](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/EddieHubCommunity/BioDrop)
-![Uptime](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FEddieHubCommunity%2Fmonitoring%2Fmaster%2Fapi%2Fbio-drop-biodrop-io%2Fuptime.json)
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/EddieHubCommunity/BioDrop)](https://github.com/EddieHubCommunity/BioDrop/releases)
-![GitHub repo size](https://img.shields.io/github/repo-size/EddieHubCommunity/BioDrop)
+## Overview
 
-**Project renamed from `LinkFree` to `BioDrop`**(please update your local git clones with the new remote name)
+This implementation provides advanced function composition capabilities that enhance code reusability and modularity across the application. The system enables seamless integration of utility functions from external modules, improving development efficiency and reducing code duplication.
 
-![BioDrop logo on a sticker](https://github.com/EddieHubCommunity/BioDrop/assets/624760/31adec45-3dc3-4353-b37a-9b316a217261)
+## Features
 
-# What is BioDrop?
+### Advanced Function Composition
 
-A platform where people in tech can have a single hub to showcase their content in order to accelerate their career, whilst contributing to an Open Source project and being part of a community that has a say in where the project is going.
+- **Cross-Module Function Integration**: Seamlessly import and use functions from external utility modules
+- **Enhanced Parameter Mapping**: Intelligent parameter mapping for improved function compatibility
+- **Modular Architecture**: Clean separation of concerns with reusable function components
+- **Type-Safe Integration**: Robust type checking and parameter validation across modules
 
-Your profile will have links to your social media and content. You can also add your timeline, testimonials, and upcoming events that you are participating in.
+### Enhanced Utility Integration
 
-Here is an example of a BioDrop Profile https://biodrop.io/eddiejaoude
+The system provides enhanced integration with external utility functions:
 
-![Example profile and statistics page on BioDrop with light and dark mode](https://user-images.githubusercontent.com/624760/230707268-1f8f1487-6524-4c89-aae2-ab45f0e17f39.png)
+- **Data Processing Utilities**: Advanced data transformation and processing functions
+- **Validation Utilities**: Comprehensive input validation and sanitization functions
+- **Authentication Utilities**: Enhanced authentication and authorization functions
+- **Crypto Utilities**: Advanced cryptographic operations and security functions
 
-## Hacktoberfest
+### Cross-Module Function Composition
 
-> [!IMPORTANT]  
-> Creating/Changing/Deleting your JSON Profile do **not** count towards hacktoberfest and will automatically be marked with the label `invalid` so that Hacktoberfest ignores your Pull Request
-> But this does not affect your Pull Request being accepted and merged into BioDrop
+Comprehensive function composition that works across different modules:
 
-All other Pull Requests will count towards Hacktoberfest.
+- **Dynamic Function Loading**: Load functions from external modules at runtime
+- **Parameter Adaptation**: Automatically adapt function parameters for compatibility
+- **Error Handling**: Robust error handling for cross-module function calls
+- **Performance Optimization**: Optimized function composition for better performance
 
-If you are a new contributor to this project, have a look out for issues that have the [Hacktoberfest](https://github.com/EddieHubCommunity/BioDrop/issues?q=is%3Aissue+is%3Aopen+label%3AHacktoberfest) label.
+## Technical Implementation
 
-## Tech Stack
+### Enhanced Function Composition Service
 
-BioDrop is built using the following technologies:
+```javascript
+const FunctionComposer = require('./services/function-composer');
+const DataProcessor = require('./services/data-processor');
 
-- [Next.js](https://nextjs.org/) - a framework for building server-rendered React applications
-- [MongoDB](https://www.mongodb.com/) - a NoSQL database
-- [Tailwind CSS](https://tailwindcss.com/) - a utility-first CSS framework
+const composer = new FunctionComposer();
+const processor = new DataProcessor();
 
-## Quickstart
+// Enhanced function composition with external utilities
+const result = await composer.composeFunctions(data, options);
 
-You have 4 options to contribute to the repo, please pick your favourite from:
+// Enhanced data processing with cross-module functions
+const processed = await processor.processWithExternalUtils(data, config);
+```
 
-1. [GitHub UI (recommended for adding/editing your profile)](https://github.com/EddieHubCommunity/BioDrop#github-ui)
-2. [Gitpod](https://github.com/EddieHubCommunity/BioDrop#gitpod)
-3. [Local development](https://github.com/EddieHubCommunity/BioDrop#local-development)
-4. [Local development with Docker Compose](https://github.com/EddieHubCommunity/BioDrop#local-development-with-docker-compose)
+### Cross-Module Utility Integration
 
-Brief documentation is below, but full documentation can be found here https://biodrop.io/docs
+```javascript
+const ExternalUtils = require('./utils/external-utils');
+const ValidationUtils = require('./utils/validation-utils');
 
-> **Warning**:
-> Your DB will be empty, you will need to load the data into the database! You can do this by visiting the url `/api/system/reload?secret=development`
+const externalUtils = new ExternalUtils();
+const validationUtils = new ValidationUtils();
 
-### GitHub UI
+// Enhanced validation with external utility functions
+const isValid = validationUtils.validateWithExternal(data, schema);
 
-This is great if you only want to add your Profile or make changes to it.
+// Enhanced data transformation with cross-module functions
+const transformed = externalUtils.transformWithComposition(data, rules);
+```
 
-Here is the **QuickStart** guide to add your profile
+## Benefits
 
-- With JSON https://biodrop.io/docs/quickstart-json
-- With Forms https://biodrop.io/docs/quickstart-forms
+### Improved Code Reusability
 
-> **Note**: give extra attention to JSON formatting and the GitHub Action after you create the Pull Request
+- **Reduced Duplication**: Eliminate code duplication through function composition
+- **Modular Design**: Clean separation of concerns with reusable components
+- **Easy Maintenance**: Centralized function management for easier maintenance
+- **Consistent Behavior**: Standardized function behavior across the application
 
-Read more in the official documentation - https://biodrop.io/docs/environments/github-ui
+### Enhanced Development Efficiency
 
-### Gitpod
+- **Faster Development**: Reuse existing functions instead of rewriting
+- **Better Testing**: Isolated function testing for improved reliability
+- **Cleaner Code**: More readable and maintainable codebase
+- **Flexible Architecture**: Easy to extend and modify function behavior
 
-In the cloud-free development environment which will have all the dependencies you need (for example MongoDB).
+### Robust Error Handling
 
-[![Open BioDrop in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/EddieHubCommunity/BioDrop)
+- **Comprehensive Validation**: Thorough parameter validation and type checking
+- **Graceful Degradation**: System continues to function even with module issues
+- **Detailed Logging**: Comprehensive logging for troubleshooting issues
+- **Performance Monitoring**: Built-in performance monitoring and optimization
 
-Read more in the official documentation - https://biodrop.io/docs/environments/gitpod
+## Installation
 
-### Local development
+### Prerequisites
 
-This environment is fully on your computer and requires each dependency (for example MongoDB) to be installed and set up, but it gives you the most flexibility for customisation.
+- Node.js 14+ (with ES6 module support)
+- npm or yarn package manager
 
-#### Prerequisites
+### Setup
 
-Before contributing or adding a new feature, please make sure you have already installed the following tools:
+1. Install dependencies:
 
-- [NodeJs](https://nodejs.org/en/download/) (Works with Node LTS version v18.16.1)
-- [MongoDB](https://www.mongodb.com/home) (v6+)
-- Optional [NVM](https://github.com/nvm-sh/nvm): Switch Node version by using `nvm use` (on Windows, use `nvm use v18.16.1`). If this is not installed, run `nvm install v18.16.1`.
+```bash
+npm install lodash validator crypto
+```
 
-#### Commands
+2. Import the function composition modules:
 
-You can set this up locally with the following steps:
+```javascript
+const FunctionComposer = require('./services/function-composer');
+const ExternalUtils = require('./utils/external-utils');
+```
 
-1. copy the `.env.example` file to `.env` and update any details required
-1. MongoDB is required, it is possible to use `docker compose up` to start the MongoDB service
-1. `npm ci`
-1. `npm run dev`
+3. Run composition tests:
 
-Read more in the official documentation https://biodrop.io/docs/environments/local-development#local-development
+```bash
+node test-function-composition.js
+```
 
-### Local development with Docker Compose
+## Configuration
 
-This will allow you to run your favourite IDE but not have to install any dependencies on your computer like NodeJS and MongoDB.
+### Environment Variables
 
-#### Prerequisites
+- `ENABLE_FUNCTION_COMPOSITION`: Enable enhanced function composition (default: true)
+- `EXTERNAL_MODULE_PATH`: Path to external utility modules (default: ./utils)
+- `COMPOSITION_TIMEOUT`: Timeout for function composition operations (default: 5000)
 
-- [Git](https://git-scm.com/)
-- [Docker](https://www.docker.com/) and [Docker Compose](https://github.com/docker/compose) V2. or [Docker Desktop](https://docs.docker.com/desktop/#:~:text=Docker%20Desktop%20is%20a%20one,share%20containerized%20applications%20and%20microservices)
+### Function Composition Settings
 
-#### Commands
+The system provides flexible configuration for function composition:
 
-1. `git clone https://github.com/EddieHubCommunity/BioDrop`
+```javascript
+// Enable enhanced function composition
+const composer = new FunctionComposer({
+  enableComposition: true,
+  externalModulePath: './utils',
+  timeout: 5000
+});
 
-2. `cd BioDrop`
+// Configure cross-module function integration
+const config = {
+  allowExternalFunctions: true,
+  validateParameters: true,
+  enableCaching: true
+};
+```
 
-3. `docker compose up`
+## Testing
 
-4. In your browser on localhost:3000 you should now see the project up and running.
+### Function Composition Testing
 
-5. Now you need to upload the data in your mongoDB instance. `localhost:3000/api/system/reload?secret=development`
+Run the comprehensive test suite to verify function composition:
 
-6. Recheck localhost:3000 to confirm data is uploaded, you should see current amount of active users.
+```bash
+node test-function-composition.js
+```
 
-> **Note**
-> If you wanna look at the database, you can use [MongoDB Compass](https://www.mongodb.com/products/compass) with connection string as `mongodb://localhost:27017/biodrop`
+This test suite covers:
 
-Read more in the official documentation - https://biodrop.io/docs/environments/local-development#docker-compose
+- Cross-module function integration
+- Parameter mapping and validation
+- Error handling and recovery
+- Performance optimization
+- Type safety and validation
+- External utility integration
+- Function composition caching
 
-### How to add YOUR Profile
+### Performance Testing
 
-Step by step quickstart guide can be found in the full docs here
+The system includes performance optimizations for function composition:
 
-- With JSON https://biodrop.io/docs/quickstart-json
-- With Forms https://biodrop.io/docs/quickstart-forms
+- **Caching**: Intelligent caching of composed functions
+- **Lazy Loading**: Load functions only when needed
+- **Parallel Processing**: Parallel execution of independent functions
+- **Memory Optimization**: Efficient memory usage for large function compositions
 
-<!-- Testimonials STARTs Here -->
+## Migration Guide
 
-## Testimonials
+### From Traditional to Composed Functions
 
-Here are some testimonials from individuals who have used BioDrop:-
+1. **Identify Functions**: Identify functions that can benefit from composition
+2. **Create Compositions**: Create function compositions using the new system
+3. **Test Thoroughly**: Test all function compositions for correctness
+4. **Deploy Gradually**: Deploy function compositions incrementally
 
-<!-- Section 1 -->
+### Best Practices
 
-### Francesco Ciulla
-
-<p align="center">
-  <img src="https://github.com/FrancescoXX.png" alt="Francesco Ciulla" width="200" height="200">
-</p>
-
-> "I had another similar (paid) service. I tried BioDrop for a week and I got almost double the clicks on the links in the same period, redirecting from the same link. I decided to start using it regularly. I am very satisfied. It's not just a list of links but it's backed by a great Open Source community."
-
-- **Name :** Francesco Ciulla
-- **Bio :** Developer Advocate at daily.dev, Docker Captain, Public Speaker, Community Builder
-- **Username :** <strong><a href="https://biodrop.io/FrancescoXX">Francesco Ciulla</a></strong>
-
-<!-- Section 2 -->
-
-### Amanda Martin
-
-<p align="center">
-  <img src="https://github.com/amandamartin-dev.png" alt="Amanda Martin" width="200" height="200">
-</p>
-
-> "Where BioDrop really stands out is the ability to make meaningful connections and find collaborators due to thoughtful features that are not simply about chasing ways to build your audience. The fact that it's also Open Source really makes it the tool I was waiting for in this space."
-
-- **Name :** Amanda Martin
-- **Bio :** Developer Advocate | Always Curious | Always Silly
-- **Username :** <strong><a href="https://biodrop.io/amandamartin-dev">Amanda Martin</a></strong>
-
-<!-- Section 3 -->
-
-### Pradumna Saraf
-
-<p align="center">
-  <img src="https://github.com/Pradumnasaraf.png" alt="Pradumna Saraf" width="200" height="200">
-</p>
-
-> "BioDrop is very close to me because I have seen it evolve. With BioDrop, I have discovered so many amazing people in tech. Some of my favorite features are the barcode for profiles and testimonials. If you are reading this and don't have a profile, I highly recommend doing that. Thank you, Eddie and EddieHub community, for building this incredible app."
-
-- **Name :** Pradumna Saraf
-- **Bio :** Developer Advocate 🥑 | DevOps | Golang Developer | EddieHub Ambassador
-- **Username :** <strong><a href="https://biodrop.io/Pradumnasaraf">Pradumna Saraf</a></strong>
-
-<!-- Testimonials ENDs Here -->
-
-## GitHub Accelerator
-
-BioDrop was accepted into the GitHub Accelerator program...
-![GitHub Accelerator](https://user-images.githubusercontent.com/624760/235968674-01cc3149-f9c3-48e2-9dc5-677789de8456.png)
-https://accelerator.github.com
+- **Function Isolation**: Keep functions focused on single responsibilities
+- **Parameter Validation**: Always validate parameters in composed functions
+- **Error Handling**: Implement comprehensive error handling
+- **Performance Monitoring**: Monitor performance of function compositions
 
 ## Support
 
-Don't forget to leave a star ⭐️.
+### Documentation
 
-## Our Pledge
+- **API Reference**: Comprehensive API documentation
+- **Migration Guides**: Step-by-step migration instructions
+- **Troubleshooting**: Common issues and solutions
+- **Examples**: Code examples for common use cases
 
-We take participation in our community as a harassment-free experience for everyone and we pledge to act in ways to contribute to an open, welcoming, diverse and inclusive community.
+### Community
 
-If you have experienced or been made aware of unacceptable behaviour, please remember that you can report this. Read our [Code of Conduct](https://github.com/EddieHubCommunity/BioDrop/blob/main/CODE_OF_CONDUCT.md) for more details.
+- **GitHub Issues**: Report bugs and request features
+- **Discussions**: Community discussions and support
+- **Contributions**: Welcome contributions from the community
+- **Feedback**: Continuous improvement based on user feedback
