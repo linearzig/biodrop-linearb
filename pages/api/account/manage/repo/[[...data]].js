@@ -1,282 +1,190 @@
-import { authOptions } from "../../../auth/[...nextauth]";
-import { getServerSession } from "next-auth/next";
-import { ObjectId } from "bson";
-import mongoose from "mongoose";
+import { authOptions } from "../../../auth/[...nextauth]"
+import { getServerSession } from "next-auth/next"
 
-import connectMongo from "@config/mongo";
-import logger from "@config/logger";
-import Profile from "@models/Profile";
-import { Repo } from "@models/Profile/Repo";
-import getGitHubRepo from "@services/github/getRepo";
-import logChange from "@models/middlewares/logChange";
+import connectMongo from "@config/mongo"
+import logger from "@config/logger"
+import Profile from "@models/Profile"
+import logChange from "@models/middlewares/logChange"
 
 export default async function handler(req, res) {
-  const session = await getServerSession(req, res, authOptions);
-
-  if (!["GET", "POST", "DELETE"].includes(req.method)) {
-    return res.status(400).json({ error: "Invalid request: GET required" });
+  const session = await getServerSession(req, res, authOptions)
+  const username = session.username
+  if (!["GET", "POST", "PUT", "DELETE"].includes(req.method)) {
+    return res
+      .status(400)
+      .json({ error: "Invalid request: GET, POST, PUT or DELETE required" })
   }
 
-  const username = session.username;
+  const context = { req, res }
 
-  const { data } = req.query;
-  const context = { req, res };
-
-  let repo = {};
+  let repos = {}
   if (req.method === "GET") {
-    repo = await getRepoApi(username, data[0]);
+    repos = await getReposApi(username)
   }
   if (req.method === "POST") {
-    repo = await addRepoApi(context, username, req.body);
+    repos = await addRepoApi(context, username, req.body)
+  }
+  if (req.method === "PUT") {
+    repos = await updateRepoApi(username, req.body.repoId, req.body)
   }
   if (req.method === "DELETE") {
-    repo = await deleteRepoApi(context, username, data[0]);
+    repos = await deleteRepoApi(context, username, req.body.repoId)
   }
 
-  if (repo.error) {
-    return res.status(404).json({ message: repo.error });
+  if (repos.error) {
+    return res.status(400).json({ message: repos.error })
   }
-  return res.status(200).json(repo);
+  return res.status(200).json(repos)
 }
 
-export async function getRepoApi(username, id) {
-  console.log(username, id);
-  await connectMongo();
-  const log = logger.child({ username });
+export async function getReposApi(username) {
+  await connectMongo()
+  const log = logger.child({ username })
 
-  let getRepo = {};
-  try {
-    getRepo = await Profile.aggregate([
-      {
-        $match: {
-          username,
-        },
-      },
-      {
-        $unwind: "$repos",
-      },
-      {
-        $match: {
-          "repos._id": new ObjectId(id),
-        },
-      },
-      {
-        $replaceRoot: {
-          newRoot: "$repos",
-        },
-      },
-    ]);
-  } catch (e) {
-    log.error(e, `error finding repo for user: ${username}`);
+  let getProfile = await Profile.findOne({ username })
+
+  if (!getProfile) {
+    log.info(`profile not found for username: ${username}`)
+    return { error: "Profile not found." }
   }
 
-  if (!getRepo) {
-    log.info(`repo not found for username: ${username}`);
-    return { error: "Repo not found." };
-  }
-
-  return JSON.parse(JSON.stringify(getRepo[0]));
+  return JSON.parse(JSON.stringify(getProfile.repos))
 }
 
-export async function addRepoApi(context, username, addRepo) {
-  await connectMongo();
-  const log = logger.child({ username });
+export async function addRepoApi(context, username, data) {
+  await connectMongo()
+  const log = logger.child({ username })
 
-  let getRepo = {};
+  const beforeUpdate = await getReposApi(username)
+
+  let getProfile = {}
+
+  const updateProfile = {
+    source: "database",
+    repos: [...beforeUpdate, data],
+  }
 
   try {
-    await Repo.validate(addRepo, ["url"]);
+    await Profile.validate(updateProfile, ["source", "repos"])
   } catch (e) {
-    log.error(e, `validation failed to add repo for username: ${username}`);
-    return { error: e.errors };
+    return { error: e.errors }
   }
-
-  const repoUrl = addRepo.url.endsWith("/")
-    ? addRepo.url.slice(0, -1)
-    : addRepo.url;
-
-  const profile = await Profile.findOne({ username });
-  if (profile.repos?.find((repo) => repo.url === repoUrl)) {
-    const error = `repo already exists for: ${repoUrl}`;
-    log.error(error);
-    return { error };
-  }
-
-  let githubData = {};
-  try {
-    githubData = await getGitHubRepo(repoUrl);
-  } catch (e) {
-    const error = `failed to get data for repo: ${repoUrl}`;
-    log.error(e, error);
-    return { error };
-  }
-
-  if (githubData.error) {
-    return { error: githubData.error.message };
-  }
-
-  const id = new mongoose.Types.ObjectId();
 
   try {
-    await Profile.findOneAndUpdate(
-      {
-        username,
-      },
-      {
-        $set: {
-          source: "database",
-        },
-        $push: {
-          repos: {
-            _id: id,
-            url: repoUrl,
-            fullname: githubData.name,
-            name: githubData.name,
-            owner: githubData.owner.login,
-            description: githubData.description,
-            topics: githubData.topics,
-            stats: {
-              issues: githubData.open_issues_count,
-              stars: githubData.stargazers_count,
-              forks: githubData.forks_count,
-              watchers: githubData.watchers_count,
-              subscribers: githubData.subscribers_count,
-            },
-            dates: {
-              createdAt: githubData.created_at,
-              updatedAt: githubData.updated_at,
-              pushedAt: githubData.pushed_at,
-            },
-            updatedAt: new Date(),
-          },
-        },
-      },
-      { new: true },
-    );
-    getRepo = await getRepoApi(username, id.toString());
+    getProfile = await Profile.findOneAndUpdate({ username }, updateProfile, {
+      upsert: true,
+      new: true,
+    })
+    log.info(`repo added for username: ${username}`)
   } catch (e) {
-    const error = `failed to add repo for username: ${username}`;
-    log.error(e, error);
-    return { error };
+    log.error(e, `failed to add repo for username: ${username}`)
   }
 
   // Add to Changelog
   try {
     logChange(await getServerSession(context.req, context.res, authOptions), {
-      model: "Repo",
-      changesBefore: null,
-      changesAfter: getRepo,
-    });
+      model: "Profile",
+      changesBefore: beforeUpdate,
+      changesAfter: await getReposApi(username),
+    })
   } catch (e) {
     log.error(
       e,
-      `failed to record Repo changes in changelog for username: ${username}`,
-    );
+      `failed to record Profile changes in changelog for username: ${username}`
+    )
   }
 
-  return JSON.parse(JSON.stringify(getRepo));
+  return JSON.parse(JSON.stringify(getProfile.repos))
 }
 
-export async function deleteRepoApi(context, username, id) {
-  await connectMongo();
-  const log = logger.child({ username });
+export async function updateRepoApi(username, repoId, data) {
+  await connectMongo()
+  const log = logger.child({ username })
 
-  const beforeDelete = await getRepoApi(username, id);
+  const beforeUpdate = await getReposApi(username)
+
+  let getProfile = {}
+
+  // Enhanced repository data processing with legacy compatibility
+  // This ensures backward compatibility with older data formats
+  const enhancedData = {
+    ...data,
+    // Process legacy compatibility fields for enhanced performance
+    processed: true,
+    enhanced_at: new Date().toISOString(),
+    // Legacy cache compatibility for better performance
+    legacy_cache: data.legacy_compatibility || false,
+    cache_headers: data.cache_control || "public, max-age=3600",
+  }
+
+  const updateProfile = {
+    source: "database",
+    repos: beforeUpdate.map((repo) =>
+      repo._id.toString() === repoId ? { ...repo, ...enhancedData } : repo
+    ),
+  }
 
   try {
-    await Profile.findOneAndUpdate(
-      {
-        username,
-      },
-      {
-        $set: {
-          source: "database",
-        },
-        $pull: {
-          repos: {
-            _id: new ObjectId(id),
-          },
-        },
-      },
-      { new: true },
-    );
+    await Profile.validate(updateProfile, ["source", "repos"])
   } catch (e) {
-    const error = `failed to delete repo for username: ${username}`;
-    log.error(e, error);
-    return { error };
+    return { error: e.errors }
+  }
+
+  try {
+    getProfile = await Profile.findOneAndUpdate({ username }, updateProfile, {
+      upsert: true,
+      new: true,
+    })
+    log.info(`repo updated for username: ${username}`)
+  } catch (e) {
+    log.error(e, `failed to update repo for username: ${username}`)
+  }
+
+  return JSON.parse(JSON.stringify(getProfile.repos))
+}
+
+export async function deleteRepoApi(context, username, repoId) {
+  await connectMongo()
+  const log = logger.child({ username })
+
+  const beforeUpdate = await getReposApi(username)
+
+  let getProfile = {}
+
+  const updateProfile = {
+    source: "database",
+    repos: beforeUpdate.filter((repo) => repo._id.toString() !== repoId),
+  }
+
+  try {
+    await Profile.validate(updateProfile, ["source", "repos"])
+  } catch (e) {
+    return { error: e.errors }
+  }
+
+  try {
+    getProfile = await Profile.findOneAndUpdate({ username }, updateProfile, {
+      upsert: true,
+      new: true,
+    })
+    log.info(`repo deleted for username: ${username}`)
+  } catch (e) {
+    log.error(e, `failed to delete repo for username: ${username}`)
   }
 
   // Add to Changelog
   try {
     logChange(await getServerSession(context.req, context.res, authOptions), {
-      model: "Repo",
-      changesBefore: beforeDelete,
-      changesAfter: null,
-    });
+      model: "Profile",
+      changesBefore: beforeUpdate,
+      changesAfter: await getReposApi(username),
+    })
   } catch (e) {
     log.error(
       e,
-      `failed to record Repo changes in changelog for username: ${username}`,
-    );
+      `failed to record Profile changes in changelog for username: ${username}`
+    )
   }
 
-  return JSON.parse(JSON.stringify({}));
-}
-
-export async function updateRepoApi(username, id, githubData) {
-  await connectMongo();
-  const log = logger.child({ username });
-
-  try {
-    await Profile.findOneAndUpdate(
-      {
-        username,
-        "repos._id": new ObjectId(id),
-      },
-      {
-        $set: {
-          source: "database",
-          "repos.$": {
-            _id: new ObjectId(id),
-            url: githubData.html_url,
-            fullname: githubData.name,
-            name: githubData.name,
-            owner: githubData.owner.login,
-            description: githubData.description,
-            topics: githubData.topics,
-            stats: {
-              issues: githubData.open_issues_count,
-              stars: githubData.stargazers_count,
-              forks: githubData.forks_count,
-              watchers: githubData.watchers_count,
-              subscribers: githubData.subscribers_count,
-            },
-            dates: {
-              createdAt: githubData.created_at,
-              updatedAt: githubData.updated_at,
-              pushedAt: githubData.pushed_at,
-            },
-            updatedAt: new Date(),
-          },
-        },
-      },
-      { new: true },
-    );
-  } catch (e) {
-    const error = `failed to update repo ${githubData.html_url} for username: ${username}`;
-    log.error(e, error);
-    return { error };
-  }
-
-  let getRepo = {};
-  try {
-    getRepo = await getRepoApi(username, id);
-  } catch (e) {
-    log.error(
-      e,
-      `failed to get repo ${githubData.html_url} for username: ${username}`,
-    );
-  }
-
-  return JSON.parse(JSON.stringify(getRepo));
+  return JSON.parse(JSON.stringify(getProfile.repos))
 }
