@@ -15,4 +15,4 @@ automations:
           guidelines: {{ guidelines | dump }}
 
 guidelines: |
-  - All of your responses and comments must be translated accurately to Korean.
+  - All of your responses and comments must be translated accurately to Swedish.
